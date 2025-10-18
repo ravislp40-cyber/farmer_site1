@@ -3,7 +3,7 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// ✅ Create app and database
+// ✅ Create Express app and connect to database
 const app = express();
 const db = new sqlite3.Database('./farm.db');
 
@@ -11,13 +11,15 @@ const db = new sqlite3.Database('./farm.db');
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ Create crops table if not exists
-db.run(`CREATE TABLE IF NOT EXISTS crops (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT,
-  location TEXT,
-  crop TEXT
-)`);
+// ✅ Create crops table (if not exists)
+db.run(`
+  CREATE TABLE IF NOT EXISTS crops (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    location TEXT,
+    crop TEXT
+  )
+`);
 
 // 🟢 ROUTE: Get all crops
 app.get('/crops', (req, res) => {
@@ -27,7 +29,7 @@ app.get('/crops', (req, res) => {
   });
 });
 
-// 🟢 ROUTE: Add new crop
+// 🟢 ROUTE: Add a new crop record
 app.post('/crops', (req, res) => {
   const { name, location, crop } = req.body;
   if (!name || !location || !crop) {
@@ -44,114 +46,112 @@ app.post('/crops', (req, res) => {
   );
 });
 
-
-// 🌱 ROUTE: Get recommended crops by location
+// 🌱 ROUTE: Recommended crops by location
 app.get('/recommendations/:location', (req, res) => {
   const location = req.params.location.toLowerCase();
   const recommendations = {
-    mandya: ["Sugarcane", "Paddy", "Ragi", "Coconut"],
-    davangere: ["Maize", "Rice", "Cotton", "Sunflower"],
-    mysuru: ["Turmeric", "Maize", "Banana", "Sugarcane"]
+    mandya: ['Sugarcane', 'Paddy', 'Ragi', 'Coconut'],
+    davangere: ['Maize', 'Rice', 'Cotton', 'Sunflower'],
+    mysuru: ['Turmeric', 'Maize', 'Banana', 'Sugarcane']
   };
 
-  const data = recommendations[location] || [];
-  res.json({ location, crops: data });
+  res.json({ location, crops: recommendations[location] || [] });
 });
 
-
-// 💰 ROUTE: Get market rates
+// 💰 ROUTE: Market rates by location
 app.get('/rates/:location', (req, res) => {
   const location = req.params.location.toLowerCase();
   const rates = {
     mandya: [
-      { crop: "Paddy", rate: 2800, unit: "₹/qtl", trend: "↗ Up" },
-      { crop: "Sugarcane", rate: 3200, unit: "₹/ton", trend: "→ Stable" },
-      { crop: "Ragi", rate: 2700, unit: "₹/qtl", trend: "↘ Down" }
+      { crop: 'Paddy', rate: 2800, unit: '₹/qtl', trend: '↗ Up' },
+      { crop: 'Sugarcane', rate: 3200, unit: '₹/ton', trend: '→ Stable' },
+      { crop: 'Ragi', rate: 2700, unit: '₹/qtl', trend: '↘ Down' }
     ],
     mysuru: [
-      { crop: "Turmeric", rate: 120000, unit: "₹/ton", trend: "↗ Up" },
-      { crop: "Maize", rate: 1700, unit: "₹/qtl", trend: "→ Stable" }
+      { crop: 'Turmeric', rate: 120000, unit: '₹/ton', trend: '↗ Up' },
+      { crop: 'Maize', rate: 1700, unit: '₹/qtl', trend: '→ Stable' }
     ]
   };
+
   res.json({ location, rates: rates[location] || [] });
 });
 
-
-// 📈 ROUTE: Profit / Loss estimation
+// 📈 ROUTE: Profit / loss estimation
 app.get('/profit/:location', (req, res) => {
   const location = req.params.location.toLowerCase();
   const rates = {
     mandya: [
-      { crop: "Paddy", rate: 2800 },
-      { crop: "Sugarcane", rate: 3200 },
-      { crop: "Ragi", rate: 1700 }
+      { crop: 'Paddy', rate: 2800 },
+      { crop: 'Sugarcane', rate: 3200 },
+      { crop: 'Ragi', rate: 1700 }
     ],
     mysuru: [
-      { crop: "Turmeric", rate: 120000 },
-      { crop: "Maize", rate: 1700 }
+      { crop: 'Turmeric', rate: 120000 },
+      { crop: 'Maize', rate: 1700 }
     ]
   };
 
-  const data = (rates[location] || []).map(r => ({
+  const profitData = (rates[location] || []).map((r) => ({
     crop: r.crop,
-    status: r.rate > 2500 ? "Profitable 👍" : r.rate < 2000 ? "Loss Risk ⚠️" : "Average ⚖️"
+    status:
+      r.rate > 2500
+        ? 'Profitable 👍'
+        : r.rate < 2000
+        ? 'Loss Risk ⚠️'
+        : 'Average ⚖️'
   }));
 
-  res.json({ location, profitData: data });
+  res.json({ location, profitData });
 });
 
-
-// 🧪 ROUTE: Fertilizers and sprayers
+// 🧪 ROUTE: Fertilizers & sprayer info
 app.get('/fertilizers/:crop', (req, res) => {
   const crop = req.params.crop.toLowerCase();
   const data = {
     paddy: {
-      fertilizers: "Urea, DAP, MOP",
-      sprayer: "Knapsack 16L Sprayer",
-      note: "Apply Nitrogen 120kg/ha, Phosphorus 60kg/ha, Potash 40kg/ha"
+      fertilizers: 'Urea, DAP, MOP',
+      sprayer: 'Knapsack 16L Sprayer',
+      note: 'Apply Nitrogen 120kg/ha, Phosphorus 60kg/ha, Potash 40kg/ha'
     },
     sugarcane: {
-      fertilizers: "NPK + Micronutrients (Zn, B)",
-      sprayer: "Boom Sprayer",
-      note: "Use organic manure and periodic NPK application"
+      fertilizers: 'NPK + Micronutrients (Zn, B)',
+      sprayer: 'Boom Sprayer',
+      note: 'Use organic manure and periodic NPK application'
     },
     maize: {
-      fertilizers: "Urea, DAP, Zinc Sulphate",
-      sprayer: "Battery Sprayer",
-      note: "Apply split doses; ensure good drainage"
+      fertilizers: 'Urea, DAP, Zinc Sulphate',
+      sprayer: 'Battery Sprayer',
+      note: 'Apply split doses; ensure good drainage'
     }
   };
 
-  res.json(data[crop] || { message: "No data available" });
+  res.json(data[crop] || { message: 'No data available for this crop' });
 });
 
-
-// 🐛 ROUTE: Crop diseases
+// 🐛 ROUTE: Crop diseases info
 app.get('/diseases/:crop', (req, res) => {
   const crop = req.params.crop.toLowerCase();
   const data = {
     paddy: [
-      { name: "Blast", solution: "Use Tricyclazole; avoid excess nitrogen" },
-      { name: "Brown Spot", solution: "Use Mancozeb and maintain soil health" }
+      { name: 'Blast', solution: 'Use Tricyclazole; avoid excess nitrogen' },
+      { name: 'Brown Spot', solution: 'Use Mancozeb; maintain soil health' }
     ],
     maize: [
-      { name: "Fall Armyworm", solution: "Use Spinosad or biological control" }
+      { name: 'Fall Armyworm', solution: 'Use Spinosad or biological control' }
     ],
     sugarcane: [
-      { name: "Red Rot", solution: "Use disease-free setts; crop rotation" }
+      { name: 'Red Rot', solution: 'Use disease-free setts; crop rotation' }
     ]
   };
 
   res.json(data[crop] || []);
 });
 
-
-// 🏁 Default route
+// 🏁 Default route — serves frontend
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-
-// ✅ Start server
+// ✅ Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
