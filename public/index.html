@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Farmer Information Dashboard</title>
 
-  <!-- ✅ Bootstrap CDN -->
+  <!-- Bootstrap 5 CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
@@ -101,7 +101,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- 🌾 Header -->
+    <!-- Header -->
     <div class="header">
       <img src="https://wiki.meramaal.com/wp-content/uploads/2018/08/raitamitra.jpg" alt="Raita Mitra Logo">
       <div>
@@ -110,7 +110,7 @@
       </div>
     </div>
 
-    <!-- 🚜 Farmer Input -->
+    <!-- Farmer Input -->
     <div class="section">
       <h4>Farmer Details</h4>
       <div class="row g-2">
@@ -126,14 +126,14 @@
       </div>
     </div>
 
-    <!-- 🌱 Recommended Crops -->
+    <!-- Recommended Crops -->
     <div class="section" id="suggestions" style="display:none;">
       <h4>🌾 Recommended Crops</h4>
       <p id="locName" class="fw-semibold"></p>
       <ul id="cropList" class="list-group"></ul>
     </div>
 
-    <!-- 💰 Market Rates -->
+    <!-- Market Rates -->
     <div class="section" id="ratesSection" style="display:none;">
       <h4>💰 Nearby Market Rates</h4>
       <table class="table table-bordered">
@@ -149,34 +149,40 @@
       </table>
     </div>
 
-    <!-- 📈 Profit/Loss -->
+    <!-- Profit/Loss -->
     <div class="section" id="profitSection" style="display:none;">
       <h4>📈 Profit / Loss Estimation</h4>
       <div id="profitList"></div>
     </div>
 
-    <!-- 🧪 Fertilizer & Chemicals -->
+    <!-- Fertilizer & Sprayer -->
     <div class="section" id="fertilizerSection" style="display:none;">
       <h4>🧪 Fertilizers & Chemical Sprayers</h4>
       <div id="fertilizerList"></div>
     </div>
 
-    <!-- 🐛 Crop Diseases -->
+    <!-- Crop Diseases -->
     <div class="section" id="diseaseSection" style="display:none;">
       <h4>🐛 Common Crop Diseases</h4>
       <div id="diseaseList"></div>
     </div>
   </div>
 
-  <!-- ✅ Bootstrap JS -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    /* ---------- SAMPLE DATA ---------- */
+    // ---------- EXTENDED DATA ----------
     const cropsByLocation = {
       mandya: ["Sugarcane", "Paddy", "Ragi", "Coconut"],
       davangere: ["Maize", "Rice", "Cotton", "Sunflower"],
-      mysuru: ["Turmeric", "Maize", "Banana", "Sugarcane"]
+      mysuru: ["Turmeric", "Maize", "Banana", "Sugarcane"],
+      bangalore: ["Tomato", "Cabbage", "Carrot", "Spinach"],
+      belagavi: ["Maize", "Soybean", "Pigeon Pea", "Sugarcane"],
+      hubli: ["Cotton", "Maize", "Pulses", "Groundnut"],
+      chikkamagaluru: ["Coffee", "Cardamom", "Arecanut", "Pepper"],
+      udupi: ["Coconut", "Cashew", "Arecanut", "Paddy"],
+      hassan: ["Tomato", "Maize", "Ragi", "Sugarcane"]
     };
 
     const marketRates = {
@@ -188,44 +194,71 @@
       mysuru: [
         { crop: "Turmeric", rate: 120000, unit: "₹/ton", trend: "↗ Up" },
         { crop: "Maize", rate: 1700, unit: "₹/qtl", trend: "→ Stable" }
+      ],
+      bangalore: [
+        { crop: "Tomato", rate: 25, unit: "₹/kg", trend: "↘ Down" },
+        { crop: "Cabbage", rate: 18, unit: "₹/kg", trend: "↗ Up" }
+      ],
+      belagavi: [
+        { crop: "Maize", rate: 1600, unit: "₹/qtl", trend: "→ Stable" },
+        { crop: "Soybean", rate: 4200, unit: "₹/qtl", trend: "↗ Up" }
+      ],
+      hubli: [
+        { crop: "Cotton", rate: 5700, unit: "₹/qtl", trend: "↗ Up" },
+        { crop: "Groundnut", rate: 5600, unit: "₹/qtl", trend: "→ Stable" }
+      ],
+      chikkamagaluru: [
+        { crop: "Coffee", rate: 18000, unit: "₹/kg", trend: "↗ Up" },
+        { crop: "Cardamom", rate: 2500, unit: "₹/kg", trend: "↘ Down" }
+      ],
+      udupi: [
+        { crop: "Coconut", rate: 45, unit: "₹/kg", trend: "↗ Up" },
+        { crop: "Cashew", rate: 550, unit: "₹/kg", trend: "→ Stable" }
+      ],
+      hassan: [
+        { crop: "Ragi", rate: 2700, unit: "₹/qtl", trend: "↘ Down" },
+        { crop: "Sugarcane", rate: 3200, unit: "₹/ton", trend: "→ Stable" }
       ]
     };
 
     const fertilizerData = {
-      Paddy: {
-        fertilizers: "Urea, DAP, MOP",
-        sprayer: "Knapsack 16L Sprayer",
-        note: "Apply Nitrogen 120kg/ha, Phosphorus 60kg/ha, Potash 40kg/ha"
-      },
-      Sugarcane: {
-        fertilizers: "NPK + Micronutrients (Zn, B)",
-        sprayer: "Boom Sprayer",
-        note: "Use organic manure and periodic NPK application"
-      },
-      Maize: {
-        fertilizers: "Urea, DAP, Zinc Sulphate",
-        sprayer: "Battery Sprayer",
-        note: "Apply split doses; ensure good drainage"
-      }
+      Paddy: { fertilizers: "Urea, DAP, MOP", sprayer: "Knapsack 16L Sprayer", note: "Apply N:120kg, P:60kg, K:40kg" },
+      Sugarcane: { fertilizers: "NPK + Micronutrients", sprayer: "Boom Sprayer", note: "Use organic manure periodically" },
+      Maize: { fertilizers: "Urea, DAP, Zinc Sulphate", sprayer: "Battery Sprayer", note: "Split doses, maintain drainage" },
+      Ragi: { fertilizers: "DAP, MOP", sprayer: "Hand Sprayer", note: "Apply balanced NPK for yield" },
+      Turmeric: { fertilizers: "Compost + NPK", sprayer: "Knapsack Sprayer", note: "Use mulch to retain moisture" },
+      Tomato: { fertilizers: "NPK + Micronutrients", sprayer: "Knapsack Sprayer", note: "Foliar spray recommended" },
+      Cabbage: { fertilizers: "DAP + Compost", sprayer: "Hand Sprayer", note: "Split N application" },
+      Coffee: { fertilizers: "Compost + NPK", sprayer: "Knapsack Sprayer", note: "Shade trees recommended" },
+      Coconut: { fertilizers: "NPK + Boron", sprayer: "Manual Sprayer", note: "Apply during flowering" },
+      Cashew: { fertilizers: "NPK + Micronutrients", sprayer: "Hand Sprayer", note: "Foliar spray for better yield" },
+      Cardamom: { fertilizers: "Organic Manure + NPK", sprayer: "Knapsack Sprayer", note: "Apply after harvesting" }
     };
 
     const diseaseData = {
       Paddy: [
-        { name: "Blast", solution: "Use Tricyclazole; avoid excess nitrogen" },
-        { name: "Brown Spot", solution: "Use Mancozeb and maintain soil health" }
+        { name: "Blast", solution: "Use Tricyclazole; avoid excess N" },
+        { name: "Brown Spot", solution: "Use Mancozeb; maintain soil health" }
       ],
-      Maize: [
-        { name: "Fall Armyworm", solution: "Use Spinosad or biological control" }
-      ]
+      Maize: [{ name: "Fall Armyworm", solution: "Use Spinosad or biological control" }],
+      Sugarcane: [{ name: "Red Rot", solution: "Use disease-free setts; crop rotation" }],
+      Ragi: [{ name: "Smut", solution: "Use healthy seeds; avoid dense planting" }],
+      Turmeric: [{ name: "Leaf Spot", solution: "Use Carbendazim; maintain drainage" }],
+      Tomato: [{ name: "Blight", solution: "Apply Copper Fungicide; avoid overhead irrigation" }],
+      Cabbage: [{ name: "Black Rot", solution: "Remove affected leaves; use bactericide" }],
+      Coffee: [{ name: "Rust", solution: "Prune infected leaves; apply fungicide" }],
+      Coconut: [{ name: "Bud Rot", solution: "Remove infected palms; spray Bordeaux mixture" }],
+      Cashew: [{ name: "Dieback", solution: "Prune affected branches; use fungicide" }],
+      Cardamom: [{ name: "Leaf Blight", solution: "Remove diseased leaves; apply copper oxychloride" }]
     };
 
-    /* ---------- FUNCTIONS ---------- */
+    // ---------- ANALYZE FUNCTION ----------
     function analyzeData() {
       const location = document.getElementById("location").value.toLowerCase().trim();
-      const locDisplay = document.getElementById("locName");
       const crops = cropsByLocation[location] || [];
+      const locDisplay = document.getElementById("locName");
 
-      // 🌾 Recommended Crops
+      // Recommended Crops
       const cropList = document.getElementById("cropList");
       cropList.innerHTML = "";
       if (crops.length > 0) {
@@ -236,40 +269,37 @@
           cropList.appendChild(li);
         });
         locDisplay.textContent = `Best crops for ${location.charAt(0).toUpperCase() + location.slice(1)}:`;
-        document.getElementById("suggestions").style.display = "block";
       } else {
         cropList.innerHTML = "<li class='list-group-item'>No data for this area.</li>";
-        document.getElementById("suggestions").style.display = "block";
+        locDisplay.textContent = "";
       }
+      document.getElementById("suggestions").style.display = "block";
 
-      // 💰 Market Rates
+      // Market Rates
       const rates = marketRates[location] || [];
       const rateTable = document.getElementById("ratesTable");
       rateTable.innerHTML = "";
-      if (rates.length > 0) {
-        rates.forEach(r => {
-          rateTable.innerHTML += `
-            <tr>
-              <td>${r.crop}</td>
-              <td>₹${r.rate.toLocaleString()}</td>
-              <td>${r.unit}</td>
-              <td>${r.trend}</td>
-            </tr>`;
-        });
-        document.getElementById("ratesSection").style.display = "block";
-      }
+      rates.forEach(r => {
+        rateTable.innerHTML += `
+          <tr>
+            <td>${r.crop}</td>
+            <td>₹${r.rate.toLocaleString()}</td>
+            <td>${r.unit}</td>
+            <td>${r.trend}</td>
+          </tr>`;
+      });
+      document.getElementById("ratesSection").style.display = rates.length ? "block" : "none";
 
-      // 📈 Profit/Loss Estimate
+      // Profit/Loss
       const profitList = document.getElementById("profitList");
       profitList.innerHTML = "";
       rates.forEach(r => {
-        const profit = r.rate > 2500 ? "profit" : r.rate < 2000 ? "loss" : "neutral";
-        const tag = profit === "profit" ? "profit" : profit === "loss" ? "loss" : "neutral";
-        profitList.innerHTML += `<p>${r.crop}: <span class="${tag}">${profit === "profit" ? "Profitable 👍" : profit === "loss" ? "Loss Risk ⚠️" : "Average ⚖️"}</span></p>`;
+        const status = r.rate > 2500 ? "profit" : r.rate < 2000 ? "loss" : "neutral";
+        profitList.innerHTML += `<p>${r.crop}: <span class="${status}">${status === "profit" ? "Profitable 👍" : status === "loss" ? "Loss Risk ⚠️" : "Average ⚖️"}</span></p>`;
       });
-      if (rates.length) document.getElementById("profitSection").style.display = "block";
+      document.getElementById("profitSection").style.display = rates.length ? "block" : "none";
 
-      // 🧪 Fertilizers
+      // Fertilizers
       const fertList = document.getElementById("fertilizerList");
       fertList.innerHTML = "";
       crops.forEach(crop => {
@@ -284,9 +314,9 @@
             </div>`;
         }
       });
-      if (crops.length) document.getElementById("fertilizerSection").style.display = "block";
+      document.getElementById("fertilizerSection").style.display = crops.length ? "block" : "none";
 
-      // 🐛 Diseases
+      // Diseases
       const diseaseList = document.getElementById("diseaseList");
       diseaseList.innerHTML = "";
       crops.forEach(crop => {
@@ -299,7 +329,7 @@
           diseaseList.innerHTML += `</ul>`;
         }
       });
-      if (crops.length) document.getElementById("diseaseSection").style.display = "block";
+      document.getElementById("diseaseSection").style.display = crops.length ? "block" : "none";
     }
   </script>
 </body>
